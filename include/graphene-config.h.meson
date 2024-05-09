@@ -71,9 +71,7 @@ extern "C" {
 #  endif
 typedef __m128 graphene_simd4f_t;
 # elif defined(GRAPHENE_USE_ARM_NEON)
-#  if defined (_MSC_VER) && (_MSC_VER < 1920) && defined (_M_ARM64)
-#   include <arm64_neon.h>
-#  else
+#  if defined (_MSC_VER) && (_M_ARM64)
 #   include <arm_neon.h>
 #  endif
 typedef float32x4_t graphene_simd4f_t;

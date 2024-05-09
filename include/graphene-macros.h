@@ -50,7 +50,7 @@
 # define GRAPHENE_ALIGNED_DECL(x,val)   x
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1910)
+#ifdef _MSC_VER
 # ifdef _M_IX86
 /* Use __vectorcall to enable SSE intrinsics on 32-bit builds on MSVC 2013 and later */
 #  define GRAPHENE_VECTORCALL   __vectorcall
@@ -61,12 +61,6 @@
 # define GRAPHENE_VECTORCALL
 #endif
 
-#ifdef _MSC_VER
-# if !defined (__cplusplus) && defined (_MSC_VER) && (_MSC_VER < 1900)
-#  define inline __inline
-# endif
-#endif
-
 #ifdef __cplusplus
 # define GRAPHENE_BEGIN_DECLS   extern "C" {
 # define GRAPHENE_END_DECLS     }
@@ -75,19 +69,11 @@
 # define GRAPHENE_END_DECLS
 #endif
 
-#if defined(_MSC_VER) && !defined(__bool_true_false_are_defined) && (_MSC_VER < 1800)
-# ifndef __GI_SCANNER__
-typedef int bool;
-#  define false 0
-#  define true 1
-# endif
-#else
-# include <stdbool.h>
-#endif
+#include <stdbool.h>
 
 #if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
 #define _GRAPHENE_DEPRECATED __attribute__((__deprecated__))
-#elif defined(_MSC_VER) && (_MSC_VER >= 1300)
+#elif defined(_MSC_VER)
 #define _GRAPHENE_DEPRECATED __declspec(deprecated)
 #else
 #define _GRAPHENE_DEPRECATED
@@ -95,7 +81,7 @@ typedef int bool;
 
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 #define _GRAPHENE_DEPRECATED_FOR(f) __attribute__((__deprecated__("Use '" #f "' instead")))
-#elif defined(_MSC_FULL_VER) && (_MSC_FULL_VER > 140050320)
+#elif defined(_MSC_VER)
 #define _GRAPHENE_DEPRECATED_FOR(f) __declspec(deprecated("is deprecated. Use '" #f "' instead"))
 #else
 #define _GRAPHENE_DEPRECATED_FOR(f) _GRAPHENE_DEPRECATED
@@ -103,7 +89,7 @@ typedef int bool;
 
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 #define _GRAPHENE_UNAVAILABLE(maj,min) __attribute__((deprecated("Not available before " #maj "." #min)))
-#elif defined(_MSC_FULL_VER) && (_MSC_FULL_VER > 140050320)
+#elif defined(_MSC_VER)
 #define _GRAPHENE_UNAVAILABLE(maj,min) __declspec(deprecated("is not available before " #maj "." #min))
 #else
 #define _GRAPHENE_UNAVAILABLE(maj,min) _GRAPHENE_DEPRECATED
