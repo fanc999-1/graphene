@@ -147,20 +147,19 @@ void    graphene_simd4x4f_transpose_in_place    (graphene_simd4x4f_t *s);
 
 #if defined(GRAPHENE_USE_SSE)
 
-#ifdef __GNUC__
 #define graphene_simd4x4f_transpose_in_place(s) \
-  (__extension__ ({ \
-    _MM_TRANSPOSE4_PS ((s)->x, (s)->y, (s)->z, (s)->w); \
-  }))
-#elif defined (_MSC_VER)
-#define graphene_simd4x4f_transpose_in_place(s) \
-  _MM_TRANSPOSE4_PS ((s)->x, (s)->y, (s)->z, (s)->w)
-#endif
+  GRAPHENE_INLINE_MACRO_BEGIN \
+    GRAPHENE_INLINE_MACRO_BODY(_MM_TRANSPOSE4_PS ((s)->x, (s)->y, (s)->z, (s)->w)) \
+  GRAPHENE_INLINE_MACRO_END
 
 #elif defined(GRAPHENE_USE_INTRINSICS)
 
+#ifndef GRAPHENE_USE_GCC_SYNTAX
+# error GCC-like compiler required for using GCC intrinsics
+#endif
+
 #define graphene_simd4x4f_transpose_in_place(s) \
-  (__extension__ ({ \
+  GRAPHENE_INLINE_MACRO_BEGIN \
     const graphene_simd4f_t sx = (s)->x; \
     const graphene_simd4f_t sy = (s)->y; \
     const graphene_simd4f_t sz = (s)->z; \
@@ -169,7 +168,7 @@ void    graphene_simd4x4f_transpose_in_place    (graphene_simd4x4f_t *s);
     (s)->y = graphene_simd4f_init (sx[1], sy[1], sz[1], sw[1]); \
     (s)->z = graphene_simd4f_init (sx[2], sy[2], sz[2], sw[2]); \
     (s)->w = graphene_simd4f_init (sx[3], sy[3], sz[3], sw[3]); \
-  }))
+  GRAPHENE_INLINE_MACRO_END
 
 #elif defined(GRAPHENE_USE_ARM_NEON)
 

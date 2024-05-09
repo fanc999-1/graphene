@@ -189,51 +189,61 @@ typedef union {
   float f[4];
 } graphene_simd4f_union_t;
 
-/* On GCC, we use __extension__ macros to avoid a static inline */
-# if defined(__GNUC__)
-
-/* Use GCC statement __extension__ to inline all these functions */
-
-#  define graphene_simd4f_init(x,y,z,w) \
-  (__extension__ ({ \
-    (graphene_simd4f_t) { (x), (y), (z), (w) }; \
-  }))
+# define graphene_simd4f_init(x,y,z,w) \
+  GRAPHENE_INLINE_MACRO_BEGIN	\
+  GRAPHENE_INLINE_MACRO_BODY((graphene_simd4f_t) { (x), (y), (z), (w) }) \
+  GRAPHENE_INLINE_MACRO_END
 
 #  define graphene_simd4f_init_zero() \
-  (__extension__ ({ \
-    (graphene_simd4f_t) _mm_setzero_ps(); \
-  }))
+  GRAPHENE_INLINE_MACRO_BEGIN \
+    GRAPHENE_INLINE_MACRO_BODY_SIMD_CAST(graphene_simd4f_t, _mm_setzero_ps()) \
+  GRAPHENE_INLINE_MACRO_END
 
 #  define graphene_simd4f_init_4f(v) \
-  (__extension__ ({ \
-    (graphene_simd4f_t) _mm_loadu_ps (v); \
-  }))
+  GRAPHENE_INLINE_MACRO_BEGIN \
+    GRAPHENE_INLINE_MACRO_BODY_SIMD_CAST(graphene_simd4f_t, _mm_loadu_ps (v)) \
+  GRAPHENE_INLINE_MACRO_END
 
 #  define graphene_simd4f_init_3f(v) \
-  (__extension__ ({ \
-    (graphene_simd4f_t) { (v)[0], (v)[1], (v)[2], 0.f }; \
-  }))
+  GRAPHENE_INLINE_MACRO_BEGIN \
+    GRAPHENE_INLINE_MACRO_BODY((graphene_simd4f_t) { (v)[0], (v)[1], (v)[2], 0.f }) \
+  GRAPHENE_INLINE_MACRO_END
 
 #  define graphene_simd4f_init_2f(v) \
-  (__extension__ ({ \
-    (graphene_simd4f_t) { (v)[0], (v)[1], 0.f, 0.f }; \
-  }))
+  GRAPHENE_INLINE_MACRO_BEGIN \
+    GRAPHENE_INLINE_MACRO_BODY((graphene_simd4f_t) { (v)[0], (v)[1], 0.f, 0.f }) \
+  GRAPHENE_INLINE_MACRO_END
 
 #  define graphene_simd4f_dup_4f(s,v) \
-  (__extension__ ({ \
-    _mm_storeu_ps ((v), (s)); \
-  }))
+  GRAPHENE_INLINE_MACRO_BEGIN \
+    GRAPHENE_INLINE_MACRO_BODY(_mm_storeu_ps ((v), (s))) \
+  GRAPHENE_INLINE_MACRO_END
 
 #  define graphene_simd4f_dup_3f(s,v) \
-  (__extension__ ({ \
-    memcpy ((v), &(s), sizeof (float) * 3); \
-  }))
+  GRAPHENE_INLINE_MACRO_BEGIN \
+    GRAPHENE_INLINE_MACRO_BODY(memcpy ((v), &(s), sizeof (float) * 3)) \
+  GRAPHENE_INLINE_MACRO_END
 
 #  define graphene_simd4f_dup_2f(s,v) \
-  (__extension__ ({ \
-    memcpy ((v), &(s), sizeof (float) * 2); \
-  }))
+  GRAPHENE_INLINE_MACRO_BEGIN \
+    GRAPHENE_INLINE_MACRO_BODY(memcpy ((v), &(s), sizeof (float) * 2)) \
+  GRAPHENE_INLINE_MACRO_END
 
+#  define graphene_simd4f_get(s,i) \
+  GRAPHENE_INLINE_FUNC_MACRO_BEGIN_2ARG(graphene_simd4f_get, float, graphene_simd4f_t, s, int, mode) \
+    GRAPHENE_INLINE_FUNC_MACRO_BODY(graphene_simd4f_union_t __u = { (s) };) \
+    GRAPHENE_INLINE_FUNC_MACRO_RETURN(float, __u.f[(mode)];) \
+  GRAPHENE_INLINE_FUNC_MACRO_END
+
+#  define graphene_simd4f_get_x(s)      graphene_simd4f_get (s, 0)
+#  define graphene_simd4f_get_y(s)      graphene_simd4f_get (s, 1)
+#  define graphene_simd4f_get_z(s)      graphene_simd4f_get (s, 2)
+#  define graphene_simd4f_get_w(s)      graphene_simd4f_get (s, 3)
+/* On GCC, we use __extension__ macros to avoid a static inline */
+# if defined(GRAPHENE_USE_GCC_SYNTAX)
+
+/* Use GCC statement __extension__ to inline all these functions */
+/*
 #  define graphene_simd4f_get(s,i) \
   (__extension__ ({ \
     graphene_simd4f_union_t __u = { (s) }; \
@@ -244,6 +254,7 @@ typedef union {
 #  define graphene_simd4f_get_y(s)      graphene_simd4f_get (s, 1)
 #  define graphene_simd4f_get_z(s)      graphene_simd4f_get (s, 2)
 #  define graphene_simd4f_get_w(s)      graphene_simd4f_get (s, 3)
+*/
 
 #  define graphene_simd4f_splat(v) \
   (__extension__ ({ \
@@ -508,36 +519,7 @@ typedef GRAPHENE_ALIGN16 union {
 # elif defined (_MSC_VER) /* Visual Studio SSE intrinsics */
 
 /* Use static inline to inline all these functions */
-
-#define graphene_simd4f_init(x,y,z,w) _simd4f_init(x,y,z,w)
-
-static inline graphene_simd4f_t
-_simd4f_init (float x, float y, float z, float w)
-{
-  graphene_simd4f_t __s = { x, y, z, w };
-  return __s;
-}
-
-#define graphene_simd4f_init_zero() \
-  _mm_setzero_ps()
-
-#define graphene_simd4f_init_4f(v) \
-  _mm_loadu_ps(v)
-
-#define graphene_simd4f_init_3f(v) \
-  graphene_simd4f_init (v[0], v[1], v[2], 0.f)
-
-#define graphene_simd4f_init_2f(v) \
-  graphene_simd4f_init (v[0], v[1], 0.f, 0.f)
-
-#define graphene_simd4f_dup_4f(s,v) \
-  _mm_storeu_ps (v, s)
-
-#define graphene_simd4f_dup_3f(s,v) \
-  memcpy (v, &s, sizeof (float) * 3)
-
-#define graphene_simd4f_dup_2f(s,v) \
-  memcpy (v, &s, sizeof (float) * 2)
+/*
 
 #define graphene_simd4f_get(s,i) _simd4f_get_xyzw(s, i)
 #define graphene_simd4f_get_x(s) _simd4f_get_xyzw(s, 0)
@@ -551,12 +533,13 @@ _simd4f_get_xyzw (graphene_simd4f_t s, int mode)
   /* mode: get_x=0
            get_y=1
            get_z=2
-           get_w=3 */
+           get_w=3 *//*
 
   graphene_simd4f_union_t u;
   u.s = s;
   return u.f[mode];
 }
+*/
 
 #define graphene_simd4f_splat(v) \
   _mm_set1_ps (v)

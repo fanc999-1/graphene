@@ -58,6 +58,44 @@
 # define GRAPHENE_ALIGNED_DECL(x,val)   x
 #endif
 
+/*
+ * Define inline macros as appropriate, '__extension__' for GCC-like
+ * and 'static inline' for Visual Studio
+ */
+#ifdef GRAPHENE_USE_GCC_SYNTAX
+# define GRAPHENE_INLINE_MACRO_BEGIN (__extension__({
+# define GRAPHENE_INLINE_MACRO_BODY(...) __VA_ARGS__;
+# define GRAPHENE_INLINE_MACRO_BODY_SIMD_CAST(type,...) (type)__VA_ARGS__;
+# define GRAPHENE_INLINE_MACRO_END }))
+
+# define GRAPHENE_INLINE_FUNC_MACRO_BEGIN(func,rtype,argtype,arg) \
+  GRAPHENE_INLINE_MACRO_BEGIN
+# define GRAPHENE_INLINE_FUNC_MACRO_BEGIN_2ARG(func,rtype,argtype0,arg0,argtype1,arg1) \
+  GRAPHENE_INLINE_MACRO_BEGIN
+# define GRAPHENE_INLINE_FUNC_MACRO_BODY(...) __VA_ARGS__ \
+# define GRAPHENE_INLINE_FUNC_MACRO_RETURN(type,...) (type) __VA_ARGS__;
+
+# define GRAPHENE_INLINE_FUNC_MACRO_END() GRAPHENE_INLINE_MACRO_END
+
+#elif defined (GRAPHENE_USE_MSC_SYNTAX)
+# define GRAPHENE_INLINE_MACRO_BEGIN
+# define GRAPHENE_INLINE_MACRO_BODY(...) __VA_ARGS__
+# define GRAPHENE_INLINE_MACRO_BODY_SIMD_CAST(type,...) __VA_ARGS__
+# define GRAPHENE_INLINE_MACRO_END
+
+# define GRAPHENE_INLINE_FUNC_MACRO_BEGIN(func,rtype,argtype,arg)	\
+__msvc__##func(arg) \
+static inline rtype __msvc__##func(argtype arg) {
+	
+# define GRAPHENE_INLINE_FUNC_MACRO_BEGIN_2ARG(func,rtype,argtype0,arg0,argtype1,arg1)	\
+__msvc__##func(arg0,arg1) \
+static inline rtype __msvc__##func(argtype0 arg0,argtype1 arg1) {
+
+# define GRAPHENE_INLINE_FUNC_MACRO_BODY(...) __VA_ARGS__
+# define GRAPHENE_INLINE_FUNC_MACRO_RETURN(type,...) return __VA_ARGS__;
+# define GRAPHENE_INLINE_FUNC_MACRO_END() }
+#endif
+
 #ifdef _MSC_VER
 # ifdef _M_IX86
 /* Use __vectorcall to enable SSE intrinsics on 32-bit builds on MSVC 2013 and later */
@@ -79,7 +117,7 @@
 
 #include <stdbool.h>
 
-#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
+#if defined (__clang__) || __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
 #define _GRAPHENE_DEPRECATED __attribute__((__deprecated__))
 #elif defined(_MSC_VER)
 #define _GRAPHENE_DEPRECATED __declspec(deprecated)
@@ -87,7 +125,7 @@
 #define _GRAPHENE_DEPRECATED
 #endif
 
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
+#if defined (__clang__) || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 #define _GRAPHENE_DEPRECATED_FOR(f) __attribute__((__deprecated__("Use '" #f "' instead")))
 #elif defined(_MSC_VER)
 #define _GRAPHENE_DEPRECATED_FOR(f) __declspec(deprecated("is deprecated. Use '" #f "' instead"))
@@ -95,7 +133,7 @@
 #define _GRAPHENE_DEPRECATED_FOR(f) _GRAPHENE_DEPRECATED
 #endif
 
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
+#if defined (__clang__) || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 #define _GRAPHENE_UNAVAILABLE(maj,min) __attribute__((deprecated("Not available before " #maj "." #min)))
 #elif defined(_MSC_VER)
 #define _GRAPHENE_UNAVAILABLE(maj,min) __declspec(deprecated("is not available before " #maj "." #min))
