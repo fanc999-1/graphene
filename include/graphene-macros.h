@@ -47,10 +47,10 @@
 # error "Add macro definitions appropriate for compiler type"
 #endif
 
-#if defined(__GNUC__)
+#ifdef GRAPHENE_USE_GCC_SYNTAX
 # define GRAPHENE_ALIGN16  __attribute__((aligned(16)))
 # define GRAPHENE_ALIGNED_DECL(x,val)   x __attribute__((aligned(val)))
-#elif defined(_MSC_VER)
+#elif defined(GRAPHENE_USE_MSC_SYNTAX)
 # define GRAPHENE_ALIGN16  __declspec(align(16))
 # define GRAPHENE_ALIGNED_DECL(x,val)   __declspec(align(val)) x
 #else
