@@ -322,7 +322,7 @@ int main () {
     return 0;
 }'''
   if cc.get_id() != 'msvc'
-    test_sse2_cflags = ['-mfpmath=sse', '-msse', '-msse2']
+    test_sse2_cflags = ['-mfpmath=sse', '-msse', '-msse2', '-msse4.1']
   else
     test_sse2_cflags = []
   endif
