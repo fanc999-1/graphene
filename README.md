@@ -91,7 +91,7 @@ at configuration time, tests will be disabled automatically.
 
 #### Building on Windows
 
-Graphene supports the Microsoft Visual C compiler 2017 and later versions.
+Graphene supports the Microsoft Visual C compiler 2019 16.8.x and later versions.
 
 Graphene also supports the [MSYS2 toolchain](http://sourceforge.net/projects/msys2/).
 

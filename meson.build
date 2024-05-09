@@ -80,7 +80,13 @@ if cc.get_id() == 'msvc'
     '-we4071',
     '-we4244',
     '-we4150',
-    '-utf-8'
+  ]
+
+  # Additional compilation flags for Visual Studio that are
+  # recommended or needed for the build
+  test_cflags += [
+    '-utf-8',            # Force unicode encoding of input sources on CJK locales
+    '-Zc:preprocessor',  # Use the newer, more compliant preprocessor
   ]
 else
   test_cflags = [
@@ -117,10 +123,15 @@ endif
 
 common_cflags = cc.get_supported_arguments(test_cflags)
 
-# MSVC: Let C4819 error out if we do not have the -utf-8 compiler flag
 if cc.get_id() == 'msvc'
+  # MSVC: Let C4819 error out if we do not have the -utf-8 compiler flag
   if not common_cflags.contains('-utf-8')
     common_cflags += cc.get_supported_arguments('-we4819')
+  endif
+  # MSVC: Error out if we do not have the newer preprocessor available
+  # (i.e. VS 2019 16.8.x or later)
+  if not common_cflags.contains('-Zc:preprocessor')
+    error('Visual Studio builds require -Zc:preprocessor, available in Visual Studio 2019 16.8.x or later')
   endif
 endif
 
