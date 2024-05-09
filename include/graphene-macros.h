@@ -39,6 +39,14 @@
 # define GRAPHENE_PRIVATE_FIELD(type,name)      type __graphene_private_##name
 #endif
 
+#if defined (__GNUC__) || defined (__clang__)
+# define GRAPHENE_USE_GCC_SYNTAX 1
+#elif defined (_MSC_VER)
+# define GRAPHENE_USE_MSC_SYNTAX 1
+#else
+# error "Add macro definitions appropriate for compiler type"
+#endif
+
 #if defined(__GNUC__)
 # define GRAPHENE_ALIGN16  __attribute__((aligned(16)))
 # define GRAPHENE_ALIGNED_DECL(x,val)   x __attribute__((aligned(val)))
